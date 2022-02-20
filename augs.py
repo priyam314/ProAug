@@ -4,11 +4,11 @@ from pprint import pprint
 #from random_words import RandomWords
 
 # Custom Modules
-from .param import Param
-from .augParam import AugParam
-from .augSeq import AugSeq
-from .augOperator import AugOperator
-from .rangeParam import *
+from ProAug.param import Param
+from ProAug.augParam import AugParam
+from ProAug.augSeq import AugSeq
+from ProAug.augOperator import AugOperator
+from ProAug.rangeParam import *
 
 # Define Empty auglist with empty dictionary
 Augs = AugSeq()

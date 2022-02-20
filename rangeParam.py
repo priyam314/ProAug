@@ -5,6 +5,7 @@ from typing import List, Union
 
 # Import Custom modules
 from ProAug import utils
+from ProAug.color import Color
 
 # Dataclasses
 
@@ -27,7 +28,9 @@ class DiscreteRange(AbstractRangeParam):
 		self.range_max:int = range_max
 
 	def __repr__(self):
-		return "DiscreteRange( range_min = {}, range_max = {} )".format(self.range_min,self.range_max)
+		return "{}DiscreteRange({}range_min={}{}{}, range_max={}{}{}){}".format(
+			Color.CYAN, Color.GREEN, Color.MAGENTA, self.range_min, Color.GREEN, 
+			Color.MAGENTA,self.range_max,Color.CYAN, Color.RESET)
 
 	def update(self):
 		pass
@@ -43,7 +46,9 @@ class ContRange(AbstractRangeParam):
 		self.range_max:float = range_max
 
 	def __repr__(self):
-		return "ContRange( range_min = {}, range_max = {} )".format(self.range_min,self.range_max)
+		return "{}ContRange({}range_min={}{}{}, range_max={}{}{}){}".format(
+			Color.CYAN, Color.GREEN, Color.MAGENTA, self.range_min, Color.GREEN, 
+			Color.MAGENTA,self.range_max,Color.CYAN, Color.RESET)
 
 	def update(self):
 		pass
@@ -58,7 +63,9 @@ class EnumRange(AbstractRangeParam):
 		self.enumsList = [arg for arg in args]
 
 	def __repr__(self):
-		return "EnumRange({})".format(", ".join([str(arg) for arg in self.enumsList]))
+		return "{}EnumRange({}{}{}){}".format(
+			Color.CYAN,Color.MAGENTA,", ".join([str(arg) for arg in self.enumsList]),
+			Color.CYAN, Color.RESET)
 
 	def show(self):
 		return self.enumsList
@@ -93,7 +100,9 @@ class StrRange(AbstractRangeParam):
 		self.size_max:float = size_max
 
 	def __repr__(self):
-		return "StrRange( size_min = {}, size_max = {})".format(self.size_min, self.size_max)
+		return "{}StrRange({}size_min={}{}{}, size_max={}{}{}){}".format(
+			Color.CYAN, Color.GREEN, Color.MAGENTA, self.size_min, Color.GREEN, 
+			Color.MAGENTA,self.size_max,Color.CYAN, Color.RESET)
 
 	def update(self):
 		pass

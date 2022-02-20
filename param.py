@@ -2,30 +2,26 @@
 from dataclasses import dataclass, field
 
 # Custom modules
-from .rangeParam import ContRange, AbstractRangeParam
+from ProAug.rangeParam import ContRange, AbstractRangeParam
+from ProAug.color import Color
 
 @dataclass
 class Param:
     """
-    @attr
-    name: name of the parameter
+    This class will hold the individual parameter information of Augmentation 
+    Operator
 
-    @attr
-    value: current value of the parameter
-
-    @attr
-    range_min: minimum value that is acceptable for the parameter
-
-    @attr
-    range_max: maximum value that is acceptable for the parameter
+    @attr 
+        name: name of the parameter
+        value: current value of the parameter
+        range: takes RangeType class as input
     """
-    """
-    @desc
-    init method of Param dataclass containing attributes
-    """
+    
     name:str=field(default="default_aug")
     value:float=field(default=0.0)
     range:AbstractRangeParam=field(default=ContRange)
 
     def __repr__(self):
-        return "Param(value = {}, range = {})".format(self.value, self.range)
+        return "{}Param({}value={}{}{}, range={}{}{}){}".format(
+            Color.CYAN,Color.GREEN, Color.MAGENTA, self.value, Color.GREEN,
+            Color.MAGENTA, self.range, Color.CYAN, Color.RESET)
