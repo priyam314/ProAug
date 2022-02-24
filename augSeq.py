@@ -5,7 +5,8 @@ from typing import List, Union
 from sys import getsizeof
 
 # Custom modules
-from ProAug.augOperator import AugOperator
+from .augOperator import AugOperator
+from .color import Color
 from ProAug import utils
 
 @dataclass
@@ -26,7 +27,9 @@ class AugSeq:
         """
         self._AugObjList:List = []
         self._augList:dict = {}
-        self._choice_name:str=field(default='blur')
+        self._ran_gen_list:list = []
+        self._choiceName:str=field(default='blur')
+        self._meta_dict:dict = {}
     
     def __repr__(self):
         return self.__class__.__name__
@@ -51,7 +54,7 @@ class AugSeq:
         self._augList.update({obj.name:obj})
         return self._augList
     
-    def addObjs(self, objs:List[AugOperator])->dict:
+    def add_objects(self, objs:List[AugOperator])->dict:
         """
         @desc
         adds the list of Augmentation Operator objects to _augList dictionary.
@@ -61,14 +64,21 @@ class AugSeq:
             self._augList.update({obj.name:obj})
         return self._augList
     
-    def add_AugObj_List(self, augObj:List)->None:
+    def add_augObj_List(self, augObj:List)->None:
         """
         @desc
         adds the Augmentation Operator Objects to a list.
         """
         self._AugObjList = augObj
+    
+    def apply_random(self, current_epoch:int=1)->None:
+        """
+        @desc
+        apply randomly chosen augmentation operator over the image/batch of images
+        """
+        return self._apply_augs(current_epoch)
 
-    def chooseRandom(self)->str:
+    def choose_random(self, current_epoch:int=1)->List[str]:
         """
         @desc
         chooses a random Augmentation Operator from Augmentation Operator Pool
@@ -83,9 +93,12 @@ class AugSeq:
         >>> OUTPUT
         'blur'
         """
-        max_prob_names = self._maxProb()
-        self._choice_name = choice(max_prob_names)
-        return self._choice_name
+        eta = ((current_epoch-1)*utils.lamda)//utils.total_epochs + 1
+        for _ in range(eta):
+            max_prob_names = self._max_prob()
+            self._choice_name = choice(max_prob_names)
+            self._ran_gen_list.append(self._choice_name)
+        return self._ran_gen_list
     
     def frequency(self)->dict:
         """
@@ -108,7 +121,7 @@ class AugSeq:
             new_dict.update({key: 1//value.probability})
         return new_dict
     
-    def init(self, add_after_epochs:int)->str:
+    def init(self, total_epochs:int, batch_size:int, lamda:int, omega:int)->str:
         """
         @desc
         add all the objects to _augList
@@ -120,9 +133,23 @@ class AugSeq:
         >>> Augs.show()
         { key:value ...}
         """
-        utils.aae = add_after_epochs
-        self.addObjs(self._AugObjList)
-        return "Initiated with add_after_epochs : {}".format(utils.aae)
+        utils.total_epochs = total_epochs
+        utils.batch_size = batch_size
+        utils.lamda = lamda
+        utils.omega = omega
+        self.add_objects(self._AugObjList)
+        var = """{green}Initiated with 
+        total_epochs:{magenta}{te}{green},
+        batch_size:{magenta}{bs}{green},
+        lamda:{magenta}{la}{green},
+        omega:{magenta}{om}{reset}"""
+        return var.format(
+                green=Color.GREEN, magenta=Color.MAGENTA,
+                reset=Color.RESET, te=total_epochs,
+                bs=batch_size, la=lamda, om=omega
+            )
+
+
 
     def operator(self, string:str)->AugOperator:
         """
@@ -201,7 +228,12 @@ class AugSeq:
         """
         return self._string_size()
     
-    def update(self)->None:
+    def update_parameters(self, rand_gen_list:List[str], current_epoch:int=1)->None:
+
+        for aug in rand_gen_list:
+            self.operator(aug).update_params(current_epoch)
+    
+    def update_probability(self, current_epoch:int=1)->None:
         """
         @desc
         updates the probability of the randomly choosen Augmentation Operator.
@@ -211,10 +243,20 @@ class AugSeq:
 
         @example
         >>> INPUT
-        >>> Augs.chooseRandom()
-        >>> Augs.update()
+        >>> Augs.choose_random()
+        >>> Augs.update_probability()
         """
-        self._augList[self._choice_name].update_prob()
+        for aug in self._ran_gen_list:
+            self._augList[aug].update_prob()
+    
+    def _apply_augs(self, current_epoch:int=1)->None:
+
+        rand_gen_list = self.choose_random(current_epoch)
+        self.update_parameters(self._ran_gen_list, current_epoch)
+        self._compose()
+    
+    def _compose(self):
+        pass
     
     def _string_size(self)->str:
         """
@@ -224,7 +266,7 @@ class AugSeq:
         size = str(getsizeof(self._augList)) + " bytes"
         return size
 
-    def _maxProb(self)->List[str]:
+    def _max_prob(self)->List[str]:
         """
         @desc
         find the list of names of those Augmentation Operator Objects which have

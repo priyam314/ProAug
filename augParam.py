@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import List
 
 # Custom modules
-from ProAug.param import Param
+from .param import Param
 
 @dataclass
 class AugParam:

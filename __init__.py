@@ -1,9 +1,9 @@
-from ProAug.augParam import AugParam
-from ProAug.augs import Augs
-from ProAug.rangeParam import ContRange, DiscreteRange, EnumRange, StrRange, ColorRange
-from ProAug.augSeq import AugSeq
-from ProAug.augOperator import AugOperator
-from ProAug.param import Param
+from .augParam import AugParam
+from .augs import Augs
+from .rangeParam import ContRange, DiscreteRange, EnumRange, StrRange, ColorRange
+from .augSeq import AugSeq
+from .augOperator import AugOperator
+from .param import Param
 
 """ TODO
 Description of all the classes in te .py files

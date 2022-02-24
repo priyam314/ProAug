@@ -4,8 +4,8 @@ from typing import Callable, Optional
 import PIL
 
 # Custom modules
-from ProAug.augParam import AugParam
-from ProAug.color import Color
+from .augParam import AugParam
+from .color import Color
 # from augSeq import AugSeq
 
 @dataclass

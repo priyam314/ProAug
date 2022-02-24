@@ -9,4 +9,4 @@
 in notebook cell or in `.py` file
 6. there is an example file that executes some functionalities from ProAug, you can download `trialAug.py`
 from [here](https://www.sendbig.com/view-files?Id=a3e4b303-4fb2-70ec-e516-779cfaa4851b) and upload it
-to the same directory where ProAug library is
+outside ProAug directory.

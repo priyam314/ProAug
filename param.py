@@ -2,8 +2,8 @@
 from dataclasses import dataclass, field
 
 # Custom modules
-from ProAug.rangeParam import ContRange, AbstractRangeParam
-from ProAug.color import Color
+from .rangeParam import ContRange, AbstractRangeParam
+from .color import Color
 
 @dataclass
 class Param:

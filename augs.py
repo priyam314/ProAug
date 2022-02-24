@@ -4,11 +4,11 @@ from pprint import pprint
 #from random_words import RandomWords
 
 # Custom Modules
-from ProAug.param import Param
-from ProAug.augParam import AugParam
-from ProAug.augSeq import AugSeq
-from ProAug.augOperator import AugOperator
-from ProAug.rangeParam import *
+from .param import Param
+from .augParam import AugParam
+from .augSeq import AugSeq
+from .augOperator import AugOperator
+from .rangeParam import *
 
 # Define Empty auglist with empty dictionary
 Augs = AugSeq()
@@ -86,4 +86,4 @@ AugObj = [
 			opacityOpr
         ]
 
-Augs.add_AugObj_List(AugObj)
+Augs.add_augObj_List(AugObj)
