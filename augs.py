@@ -14,50 +14,50 @@ from .rangeParam import *
 Augs = AugSeq()
 
 # Define all possible Augmentation Operators
-blurOpr = AugOperator( "blur", blur, 1.0, AugParam().add(
-									Param("radius", 0.0, ContRange(0.0, 100.0))))
+blurOpr = AugOperator( "blur", blur, 1.0, AugParam(
+									Param("radius", 0.01, ContRange(0.01, 20.0))))
 
-brightnessOpr = AugOperator( "brightness", brightness, 1.0, AugParam().add(
-        						Param("factor", 1.0, ContRange(-255.0, 255.0))))
+# brightnessOpr = AugOperator( "brightness", brightness, 1.0, AugParam(
+#         						Param("factor", 1.0, ContRange(0.07, 2.5))))
 
-aspectRatioOpr = AugOperator( "change_aspect_ratio", change_aspect_ratio, 1.0,
-							AugParam().add(
-								Param("ratio", 1.0, ContRange(0.0, 100.0))))
+# aspectRatioOpr = AugOperator( "change_aspect_ratio", change_aspect_ratio, 1.0,
+# 							AugParam(
+# 								Param("ratio", 1.0, ContRange(0.0, 100.0))))
 
-clipImageOpr = AugOperator( "clip_image_size", clip_image_size, 1.0,AugParam().add(
-            					Param("min_resolution", 0, ContRange(0, 10000)),
-            					Param("max_resolution", 10000, ContRange(10000,90000))))
+# clipImageOpr = AugOperator( "clip_image_size", clip_image_size, 1.0,AugParam(
+#             					Param("min_resolution", 0, ContRange(0, 10000)),
+#             					Param("max_resolution", 10000, ContRange(10000,90000))))
 
-colorJitterOpr = AugOperator( "color_jitter", color_jitter, 1.0, AugParam().add(
-            					Param("brightness_factor", 1.0, ContRange(-255.0, 255)),
-            					Param("contrast_factor", 1.0, ContRange(-255.0, 255.0)),
-            					Param("saturation_factor", 1.0, ContRange(-255.0, 255.0))))
+colorJitterOpr = AugOperator( "color_jitter", color_jitter, 1.0, AugParam(
+            					Param("brightness_factor", 1.0, ContRange(0.1, 2.0)),
+            					Param("contrast_factor", 1.0, ContRange(3.0, 0.1)),
+            					Param("saturation_factor", 1.0, LoopContRange(0.05, 5.0))))
 
-contrastOpr = AugOperator( "contrast", contrast, 1.0, AugParam().add(
+contrastOpr = AugOperator( "contrast", contrast, 1.0, AugParam(
         					Param("factor", 1.0, ContRange(0.0, 255.0))))
 
 # convert_color NOT IMPLEMENTED
-cropOpr = AugOperator( "crop", crop, 1.0, AugParam().add(
+cropOpr = AugOperator( "crop", crop, 1.0, AugParam(
     					Param("x1", 0.25, ContRange(0.0, 0.5)),
     					Param("y1", 0.25, ContRange(0.0, 0.5)),
     					Param("x2", 0.25, ContRange(0.5, 1.0)),
     					Param("y2", 0.75, ContRange(0.5, 1.0))))
 
-encodingQualityOpr = AugOperator( "encoding_quality", encoding_quality, 1.0, AugParam().add(
+encodingQualityOpr = AugOperator( "encoding_quality", encoding_quality, 1.0, AugParam(
         							Param("quality", 50, ContRange(0, 100))))
 
-grayscaleOpr = AugOperator( "grayscale", grayscale, 1.0, AugParam().add(
+grayscaleOpr = AugOperator( "grayscale", grayscale, 1.0, AugParam(
 									Param("mode", "luminosity", EnumRange(
 										"luminosity", "average"))))
-
+										
 hFlipOpr = AugOperator( "hflip", hflip, 1.0 )
 
-memeFormatOpr = AugOperator( "meme_format", meme_format, 1.0, AugParam().add(
+memeFormatOpr = AugOperator( "meme_format", meme_format, 1.0, AugParam(
 									Param("text", "LOL", StrRange(1, 7)),
 									Param("opacity", 1.0, ContRange(0.0, 1.0)),
 									Param("caption_height", 250, DiscreteRange(10, 300))))
 
-opacityOpr = AugOperator("opacity", opacity, 1.0, AugParam().add(
+opacityOpr = AugOperator("opacity", opacity, 1.0, AugParam(
 							Param("level", 1.0, ContRange(0.2, 1.0))))
 
 # >>> overlay_image(opacity, emoji_size, x_pos, y_pos) NOT IMPLEMENTED
@@ -73,9 +73,6 @@ opacityOpr = AugOperator("opacity", opacity, 1.0, AugParam().add(
 # Define AugObj list that will contain s of all Augmentation Operator Objects
 AugObj = [
             blurOpr,
-            brightnessOpr,
-            aspectRatioOpr,
-            clipImageOpr,
             colorJitterOpr,
             contrastOpr,
             cropOpr,

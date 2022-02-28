@@ -3,10 +3,12 @@ from dataclasses import dataclass, field
 from numpy.random import choice
 from typing import List, Union
 from sys import getsizeof
+import PIL
 
 # Custom modules
 from .augOperator import AugOperator
 from .color import Color
+from .augUtils import UtilClass
 from ProAug import utils
 
 @dataclass
@@ -30,6 +32,7 @@ class AugSeq:
         self._ran_gen_list:list = []
         self._choiceName:str=field(default='blur')
         self._meta_dict:dict = {}
+        self.util:UtilClass = UtilClass()
     
     def __repr__(self):
         return self.__class__.__name__
@@ -71,12 +74,17 @@ class AugSeq:
         """
         self._AugObjList = augObj
     
-    def apply_random(self, current_epoch:int=1)->None:
+    def apply_random(self, data:List[PIL.Image.Image]=1, current_epoch:int=1)->None:
         """
         @desc
-        apply randomly chosen augmentation operator over the image/batch of images
+            apply randomly chosen augmentation operator over the image/batch of images
+
+        @example
+            >>> for epoch in range(epochs+1):
+            >>>     for data,_ in dataloader:
+            >>>         x_aug, x = Augs.apply_random(data, epoch), data
         """
-        return self._apply_augs(current_epoch)
+        return self._apply_augs(data, current_epoch)
 
     def choose_random(self, current_epoch:int=1)->List[str]:
         """
@@ -93,11 +101,10 @@ class AugSeq:
         >>> OUTPUT
         'blur'
         """
-        eta = ((current_epoch-1)*utils.lamda)//utils.total_epochs + 1
+        eta = ((current_epoch-1)*self.utils.l)//self.utils.te + 1
         for _ in range(eta):
             max_prob_names = self._max_prob()
-            self._choice_name = choice(max_prob_names)
-            self._ran_gen_list.append(self._choice_name)
+            self._ran_gen_list.append(choice(max_prob_names))
         return self._ran_gen_list
     
     def frequency(self)->dict:
@@ -121,7 +128,7 @@ class AugSeq:
             new_dict.update({key: 1//value.probability})
         return new_dict
     
-    def init(self, total_epochs:int, batch_size:int, lamda:int, omega:int)->str:
+    def init(self, dataset_size:int, total_epochs:int, batch_size:int, lamda:int)->str:
         """
         @desc
         add all the objects to _augList
@@ -133,23 +140,18 @@ class AugSeq:
         >>> Augs.show()
         { key:value ...}
         """
-        utils.total_epochs = total_epochs
-        utils.batch_size = batch_size
-        utils.lamda = lamda
-        utils.omega = omega
+        self.util.dataset_size(dataset_size).batch_size(batch_size).total_epochs(total_epochs).lamda(lamda)
         self.add_objects(self._AugObjList)
-        var = """{green}Initiated with 
-        total_epochs:{magenta}{te}{green},
-        batch_size:{magenta}{bs}{green},
-        lamda:{magenta}{la}{green},
-        omega:{magenta}{om}{reset}"""
+        self.util.omega(self.length())
+        var = """{green}Augs initiated with\n  DATASET_SIZE: {magenta}{ds}{green},\n  TOTAL_EPOCHS: {magenta}{te}{green},\n  BATCH_SIZE: {magenta}{bs}{green},\n  LAMDA: {magenta}{la}{green},\n  OMEGA: {magenta}{om}{reset}"""
         return var.format(
                 green=Color.GREEN, magenta=Color.MAGENTA,
-                reset=Color.RESET, te=total_epochs,
-                bs=batch_size, la=lamda, om=omega
+                reset=Color.RESET, te=utils.te,
+                bs=utils.bs, la=utils.l, om=utils.o, ds=utils.ds
             )
-
-
+        
+    def length(self)->int:
+        return len(self._augList)
 
     def operator(self, string:str)->AugOperator:
         """
@@ -228,18 +230,18 @@ class AugSeq:
         """
         return self._string_size()
     
-    def update_parameters(self, rand_gen_list:List[str], current_epoch:int=1)->None:
+    def update_parameters(self, rand_gen_list:List[str], utils:UtilClass=self.util,current_epoch:int=1)->None:
 
-        for aug in rand_gen_list:
-            self.operator(aug).update_params(current_epoch)
+        for aug_name in rand_gen_list:
+            self.operator(aug_name).update_parameters(self.util, current_epoch)
     
-    def update_probability(self, current_epoch:int=1)->None:
+    def update_probability(self)->None:
         """
         @desc
-        updates the probability of the randomly choosen Augmentation Operator.
-        It works in conjunction with chooseRandom(). attribute _choice_name is
-        assigned the chooseRandom() value, which is now publicily accessible in
-        the dataclass.
+            updates the probability of the randomly choosen Augmentation Operator.
+            It works in conjunction with chooseRandom(). attribute _choice_name is
+            assigned the chooseRandom() value, which is now publicily accessible in
+            the dataclass.
 
         @example
         >>> INPUT
@@ -247,12 +249,12 @@ class AugSeq:
         >>> Augs.update_probability()
         """
         for aug in self._ran_gen_list:
-            self._augList[aug].update_prob()
+            self._augList[aug].update_probability()
     
-    def _apply_augs(self, current_epoch:int=1)->None:
+    def _apply_augs(self, data:PIL.Image.Image=1, current_epoch:int=1)->None:
 
-        rand_gen_list = self.choose_random(current_epoch)
-        self.update_parameters(self._ran_gen_list, current_epoch)
+        self._rand_gen_list = self.choose_random(current_epoch)
+        self.update_parameters(self._ran_gen_list, self.util, current_epoch)
         self._compose()
     
     def _compose(self):

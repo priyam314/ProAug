@@ -5,28 +5,33 @@ import PIL
 
 # Custom modules
 from .augParam import AugParam
+from .param import Param
 from .color import Color
+from .augUtils import UtilClass
+
 # from augSeq import AugSeq
 
-@dataclass
 class AugOperator:
     """
     Dataclass object for Augmentation Operator
 
     @attr
-        name: name of the augmentation operator
-        func: function id of the augmentation operator. By default ''
-        probability: probability of applying the very augmentation operator on batch
-        params: dictionary of parameters of augmentation operator
+        name: name of the augmentation operator 
+        func: function id of the augmentation operator. By default '' 
+        probability: probability of applying the very augmentation operator 
+            on batch 
+        params: dictionary of parameters of augmentation operator 
         add_to: takes AugSeq() as a parameter. Adds the current AugOperator() to that
                 AugSeq().
     """
+    def __init__(self, name:str, func:Callable, probability:float
+        ,params:Optional[AugParam] = AugParam(), add_to:Optional[Callable] = None)->None:
 
-    name:str
-    func:Callable
-    probability:float
-    params:Optional[AugParam] = None
-    add_to:Optional[Callable] = None
+        self.name = name
+        self.func = func
+        self.probability = probability
+        self.params = params
+        self.add_to = add_to
 
     def __post_init__(self):
         """
@@ -36,11 +41,17 @@ class AugOperator:
         if self.add_to is not None:self.add_to.add(self)
 
     def __repr__(self):
-        return "{}AugOperator() for {}{}{}, id : {}{}{}".format(
-            Color.GREEN, Color.YELLOW, str(self.name), Color.GREEN,
-            Color.MAGENTA, str(id(self)), Color.RESET)
+        var = """{cyan}AugOperator({green}func={yellow}{func_name}{green}, probability={magenta}{prob}{green},
+        params={params}{cyan}){reset}"""
+        return var.format(
+            green=Color.GREEN, yellow=Color.YELLOW, func_name=self.func,
+            magenta=Color.MAGENTA, cyan=Color.CYAN, reset=Color.RESET,
+            params=self.params, prob=self.probability)
+    
+    def parameter(self, name:str="")->Param:
+        return self.params.parameter(name)
 
-    def update_prob(self)->None:
+    def update_probability(self)->None:
         """
         @desc
         updates the probability of the Augmentation Operator using certain heuristic
@@ -56,5 +67,9 @@ class AugOperator:
         """
         self.probability = 1.0/(1.0/self.probability+1.0)
 
-    def update_params(self):
-        pass
+    def update_parameters(self, util:UtilClass, current_epoch:int=1):
+        self.params.update_parameters(util, current_epoch)
+    
+    def get_parameters(self)->dict:
+        return self.params.get_parameters()
+
