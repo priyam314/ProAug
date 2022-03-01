@@ -33,8 +33,8 @@ colorJitterOpr = AugOperator( "color_jitter", color_jitter, 1.0, AugParam(
             					Param("contrast_factor", 1.0, ContRange(3.0, 0.1)),
             					Param("saturation_factor", 1.0, LoopContRange(0.05, 5.0))))
 
-contrastOpr = AugOperator( "contrast", contrast, 1.0, AugParam(
-        					Param("factor", 1.0, ContRange(0.0, 255.0))))
+# contrastOpr = AugOperator( "contrast", contrast, 1.0, AugParam(
+#         					Param("factor", 1.0, ContRange(0.0, 255.0))))
 
 # convert_color NOT IMPLEMENTED
 cropOpr = AugOperator( "crop", crop, 1.0, AugParam(
@@ -54,11 +54,11 @@ hFlipOpr = AugOperator( "hflip", hflip, 1.0 )
 
 memeFormatOpr = AugOperator( "meme_format", meme_format, 1.0, AugParam(
 									Param("text", "LOL", StrRange(1, 7)),
-									Param("opacity", 1.0, ContRange(0.0, 1.0)),
+									Param("opacity", 1.0, ContRange(0.09, 0.98)),
 									Param("caption_height", 250, DiscreteRange(10, 300))))
 
 opacityOpr = AugOperator("opacity", opacity, 1.0, AugParam(
-							Param("level", 1.0, ContRange(0.2, 1.0))))
+							Param("level", 1.0, ContRange(0.1, 0.98))))
 
 # >>> overlay_image(opacity, emoji_size, x_pos, y_pos) NOT IMPLEMENTED
 # >>> overlay_image(opacity, overlay_size, x_pos, y_pos, overlay) NOT IMPLEMENTED
@@ -74,7 +74,6 @@ opacityOpr = AugOperator("opacity", opacity, 1.0, AugParam(
 AugObj = [
             blurOpr,
             colorJitterOpr,
-            contrastOpr,
             cropOpr,
             encodingQualityOpr,
 			grayscaleOpr,

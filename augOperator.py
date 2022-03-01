@@ -27,11 +27,11 @@ class AugOperator:
     def __init__(self, name:str, func:Callable, probability:float
         ,params:Optional[AugParam] = AugParam(), add_to:Optional[Callable] = None)->None:
 
-        self.name = name
-        self.func = func
-        self.probability = probability
-        self.params = params
-        self.add_to = add_to
+        self.name: str = name
+        self.func: Callable = func
+        self.probability: float = probability
+        self.params: AugParam = params
+        self.add_to: Callable = add_to
 
     def __post_init__(self):
         """
@@ -48,26 +48,42 @@ class AugOperator:
             magenta=Color.MAGENTA, cyan=Color.CYAN, reset=Color.RESET,
             params=self.params, prob=self.probability)
     
-    def parameter(self, name:str="")->Param:
-        return self.params.parameter(name)
+    def parameter(self, param_name:str="")->Param:
+        """
+        @desc
+        >>> returns the Param Object __repr__ of parameter whose name is `param_name`
+        """
+        return self.params.parameter(param_name)
 
     def update_probability(self)->None:
         """
         @desc
-        updates the probability of the Augmentation Operator using certain heuristic
+        >>> updates the probability of the Augmentation Operator using certain heuristic
         p->1/(1+p)
 
         @example
-        if p=1, then
+        >>> if p=1, then
         probability would transition in certain way
         1->1/2->1/3->1/4...
 
         @also
-        p->1/(1+p)->[1/(1+p)]/(1+[1/(1+p)])=1/(2+p)->1/(3+p)
+        >>> p->1/(1+p)=>[1/(1+p)]/(1+[1/(1+p)])=1/(2+p)->1/(3+p)
         """
         self.probability = 1.0/(1.0/self.probability+1.0)
 
-    def update_parameters(self, util:UtilClass, current_epoch:int=1):
+    def __reset_parameters(self, util: UtilClass, current_epoch: int=1)->None:
+        """
+        @desc
+        >>> sends the request to AugParam to reset the values of parameters
+        """
+        self.params.__reset_parameters(util, current_epoch)
+
+    def update_parameters(self, util: UtilClass, current_epoch: int=1)->None:
+        """
+        @desc
+        >>> sends the request to AugParam to execute update_parameters method for 
+        all available params
+        """
         self.params.update_parameters(util, current_epoch)
     
     def get_parameters(self)->dict:

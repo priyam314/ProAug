@@ -47,13 +47,13 @@ class AbstractRangeParam(ABC):
 class DiscreteRange(AbstractRangeParam):
     """
     @desc
-    Discrete Range class to encapsulate the range which consists of discrete values
+    >>> Discrete Range class to encapsulate the range which consists of discrete values
     """
 
     def __init__(self, range_min: int, range_max: int):
-        self.range_min: int = range_min
-        self.range_max: int = range_max
-        self.current_value :int = self.range_min
+        self.__range_min: int = range_min
+        self.__range_max: int = range_max
+        self.__current_value :int = self.__range_min
 
     def __repr__(self):
         var = """{cyan}DiscreteRange({green}
@@ -61,16 +61,19 @@ class DiscreteRange(AbstractRangeParam):
                         range_max={magenta}{range_max}{green},
                         current_value={magenta}{current_value}{cyan}){reset}"""
         return var.format(
-            cyan=Color.CYAN, green=Color.GREEN, magenta=Color.MAGENTA, range_min=self.range_min, 
-            range_max=self.range_max, current_value=self.current_value, reset=Color.RESET)
+            cyan=Color.CYAN, green=Color.GREEN, magenta=Color.MAGENTA, range_min=self.__range_min, 
+            range_max=self.__range_max, current_value=self.__current_value, reset=Color.RESET)
 
     def update(self, util: UtilClass, current_epoch: int=1):
-        d = (self.range_max-self.range_min)/float(util.aug_app(current_epoch))
-        if self.current_value>self.range_max:
-            self.current_value=self.range_min
+        if self.__current_value>self.__range_max: # reset
+            self.__current_value=self.__range_min
         else:
-            self.current_value += int(d)
-
+            self.__current_value += util.divide_float(
+                self.__range_max-self.__range_min,util.aug_app(current_epoch))
+    
+    @property
+    def get_value(self)->int:
+        return int(self.__current_value)
 
 class ContRange(AbstractRangeParam):
     """
@@ -85,9 +88,9 @@ class ContRange(AbstractRangeParam):
     """
 
     def __init__(self, range_min: float, range_max: float):
-        self.range_min: float = range_min
-        self.range_max: float = range_max
-        self.current_value: float = self.range_min
+        self.__range_min: float = range_min
+        self.__range_max: float = range_max
+        self.__current_value: float = self.__range_min
 
     def __repr__(self):
         var = """{cyan}ContRange({green}
@@ -96,15 +99,28 @@ class ContRange(AbstractRangeParam):
                         current_value={magenta}{value}{cyan}){reset}"""
         return var.format(
             cyan=Color.CYAN, green=Color.GREEN, magenta=Color.MAGENTA, 
-			min=self.range_min, max=self.range_max,value=self.current_value,
+			min=self.__range_min, max=self.__range_max,value=self.__current_value,
 			reset=Color.RESET)
 
-    def update(self, util:UtilClass,current_epoch:int=1)->float:
-        d = (self.range_max-self.range_min)/float(util.aug_app(current_epoch))
-        if self.current_value>self.range_max:
-            self.current_value=self.range_min
+    def update(self, util: UtilClass, current_epoch:int=1)->float:
+        if self.__range_max>self.__range_min:
+            self.__update_util(self.__range_max, self.__range_min, util, current_epoch)
         else:
-            self.current_value += d
+            self.__update_util(self.__range_min, self.__range_max, util, current_epoch)
+    
+    def __update_util(self, a: float, b: float, util: UtilClass, current_epoch: int=1)->None:
+        if self.__current_value>a or self.__current_value<b:
+                self.__current_value=b
+        elif a>b:
+            self.__current_value += util.divide_float(
+                a-b,util.aug_app(current_epoch))
+        else:
+            self.__current_value -= util.divide_float(
+                a-b,util.aug_app(current_epoch))
+
+    @property 
+    def get_value(self)->float:
+        return self.__current_value
     
 
 class LoopContRange(AbstractRangeParam):
@@ -114,10 +130,10 @@ class LoopContRange(AbstractRangeParam):
         it first goes from range_min to range_max, and then in reverse in same AUG_APP steps
     """
     def __init__(self, range_min: float, range_max: float):
-        self.range_min: float = range_min
-        self.range_max: float = range_max
-        self.current_value: float = self.range_min
-        self.positive:bool = True
+        self.__range_min: float = range_min
+        self.__range_max: float = range_max
+        self.__current_value: float = self.__range_min
+        self.__positive:bool = True
 
     def __repr__(self):
         var = """{cyan}LoopContRange({green}
@@ -127,20 +143,26 @@ class LoopContRange(AbstractRangeParam):
                         positive={magenta}{positive_value}{cyan}){reset}"""
         return var.format(
             cyan=Color.CYAN, green=Color.GREEN, magenta=Color.MAGENTA, 
-			min=self.range_min, max=self.range_max,value=self.current_value,
-			reset=Color.RESET, positive_value=self.positive)
+			min=self.__range_min, max=self.__range_max,value=self.__current_value,
+			reset=Color.RESET, positive_value=self.__positive)
 
     def update(self, util:UtilClass, current_epoch:int=1)->float:
 
-        while self.current_value<self.range_max and self.positive:
-            d = 2*(self.range_max-self.range_min)/float(util.aug_app(current_epoch))
-            self.current_value += d
+        while self.__current_value<=self.__range_max and self.__positive:
+            self.__current_value += 2*util.divide_float(
+                self.__range_max-self.__range_min, util.aug_app(current_epoch))
 
-        if self.current_value>=self.range_max:self.positive=False
+        if self.__current_value>=self.__range_max and self.__positive:self.__positive=False
 
-        while self.current_value>=self.range_min and not self.positive:
-            d = 2*(self.range_max-self.range_min)/float(util.aug_app(current_epoch))
-            self.current_value -= d
+        while self.__current_value>=self.__range_min and not self.__positive:
+            self.__current_value -= 2*util.divide_float(
+                self.__range_max-self.__range_min, util.aug_app(current_epoch))
+
+        if self.__current_value<=self.__range_min and not self.__positive:self.__positive=True
+    
+    @property 
+    def get_value(self)->float:
+        return self.__current_value
 
 class EnumRange(AbstractRangeParam):
     """
@@ -164,9 +186,11 @@ class EnumRange(AbstractRangeParam):
 
     def update(self, util: UtilClass, current_epoch: int=1):
         shuffle(self.__enumsList)
-        # self.__choice_enum = random.choice(self.__enumsList)
-        self.__choice_enum = self.__enumsList[0]
-
+        self.__choice_enum = choice(self.__enumsList)
+    
+    @property
+    def get_value(self)->str:
+        return self.__choice_enum
 
 class ColorRange(AbstractRangeParam):
     """
@@ -192,6 +216,10 @@ class ColorRange(AbstractRangeParam):
 
     def update(self):
         self.__red, self.__green, self.__blue = choices(self.__range_list, k=3)
+    
+    @property
+    def get_value(self)->List:
+        return [self.__red, self.__green, self.__blue]
 
 class StrRange(AbstractRangeParam):
     """
@@ -200,20 +228,26 @@ class StrRange(AbstractRangeParam):
     """
 
     def __init__(self, range_min: int, range_max: int):
-        self.range_min: float = range_min
-        self.range_max: float = range_max
-        self.current_string_len: int = 1
-        self.string: str = ""
+        self.__range_min: float = range_min
+        self.__range_max: float = range_max
+        self.__current_string_len: int = 1
+        self.__string: str = ""
 
     def __repr__(self):
         return "{}StrRange({}range_min={}{}{}, range_max={}{}{}){}".format(
-            Color.CYAN, Color.GREEN, Color.MAGENTA, self.size_min, Color.GREEN,
-            Color.MAGENTA, self.size_max, Color.CYAN, Color.RESET)
+            Color.CYAN, Color.GREEN, Color.MAGENTA, self.__range_min, Color.GREEN,
+            Color.MAGENTA, self.__range_max, Color.CYAN, Color.RESET)
 
     def update(self, util: UtilClass, current_epoch: int=1):
-        d = (self.range_max-self.range_min)/float(util.aug_app(current_epoch))
-        self.current_string_len += d
-        self.string = self.__out_n_len_str(int(self.current_string_len))
+        if util.isChange(current_epoch):
+            self.__current_string_len = 1
+        self.__current_string_len += util.divide_float(
+            self.__range_max-self.__range_min, util.aug_app(current_epoch))
+        self.__string = self.__out_n_len_str(int(self.__current_string_len))
 
     def __out_n_len_str(self, n: int=1)->str:
         return "".join([str(choice(ascii_uppercase + ascii_lowercase)) for i in range(n)])
+    
+    @property
+    def get_value(self)->str:
+        return self.__string

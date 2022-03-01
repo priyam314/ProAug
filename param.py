@@ -28,5 +28,8 @@ class Param:
             Color.CYAN,Color.GREEN, Color.MAGENTA, self.default_value, Color.GREEN,
             Color.MAGENTA, self.range, Color.CYAN, Color.RESET)
     
-    def update(self, util:UtilClass, current_epoch:int=1)->None:
+    def update(self, util: UtilClass, current_epoch: int=1)->None:
         self.range.update(util, current_epoch)
+    
+    def get_value(self):
+        return self.range.get_value

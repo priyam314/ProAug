@@ -4,6 +4,7 @@ from .rangeParam import ContRange, DiscreteRange, EnumRange, StrRange, ColorRang
 from .augSeq import AugSeq
 from .augOperator import AugOperator
 from .param import Param
+from .augUtils import UtilClass
 
 """ TODO
 Description of all the classes in te .py files
