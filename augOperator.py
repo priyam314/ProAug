@@ -86,6 +86,6 @@ class AugOperator:
         """
         self.params.update_parameters(util, current_epoch)
     
-    def get_parameters(self)->dict:
-        return self.params.get_parameters()
+    def get_parameters(self, update: bool=True)->dict:
+        return self.params.get_parameters(update)
 

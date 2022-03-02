@@ -29,6 +29,7 @@ class AugSeq:
         self.__augList: dict = {}
         self.__ran_gen_list: list = []
         self.__util: UtilClass = UtilClass()
+        self.__update: bool = True
     
     def __repr__(self):
         return self.__class__.__name__
@@ -59,7 +60,7 @@ class AugSeq:
         """
         self.__AugObjList = augObj
     
-    def apply_random(self, data: List[PIL.Image.Image], current_epoch:int=1)->None:
+    def apply_random(self, data: List[PIL.Image.Image], current_epoch:int=1, update:bool = True)->None:
         """
         @desc
         >>> apply randomly chosen augmentation operator over the image/batch of images
@@ -69,7 +70,8 @@ class AugSeq:
         >>>     for data,_ in dataloader:
         >>>         x_aug, x = Augs.apply_random(data, epoch), data
         """
-        return self.__apply_random(data, current_epoch)
+        self.__update = update
+        return self.__apply_random(data, current_epoch, update)
 
     def choose_random(self, current_epoch:int=1)->None:
         """
@@ -119,7 +121,7 @@ class AugSeq:
     def get_parameters_value(self)->dict:
         params = {}
         for name, augopr in self.__augList.items():
-            params.update({name:augopr.get_parameters()})
+            params.update({name:augopr.get_parameters(self.__update)})
         return params
 
     def init(self, dataset_size:int, total_epochs:int, batch_size:int, lamda:int)->str:
@@ -246,10 +248,11 @@ class AugSeq:
             self.__augList.update({obj.name:obj})
         return self.__augList
     
-    def __apply_random(self, data:PIL.Image.Image=1, current_epoch:int=1)->None:
+    def __apply_random(self, data:PIL.Image.Image=1, current_epoch:int=1, update:bool=True)->None:
 
         self.choose_random(current_epoch)
-        self.update_parameters(current_epoch)
+        if update:
+            self.update_parameters(current_epoch)
         self.reset(current_epoch)
     
     def __compose(self):

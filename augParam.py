@@ -43,10 +43,13 @@ class AugParam:
     def parameter(self, name:str="")->Param:
         return self.__paramList[name]
     
-    def get_parameters(self)->dict:
+    def get_parameters(self, update: bool=True)->dict:
         params = {}
         for name, param in self.__paramList.items():
-            params.update({name:param.get_value()})
+            if update:
+                params.update({name:param.get_value()})
+            else:
+                params.update({name:param.get_default_value()})
         return params
     
     def list(self):

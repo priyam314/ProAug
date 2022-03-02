@@ -33,3 +33,6 @@ class Param:
     
     def get_value(self):
         return self.range.get_value
+    
+    def get_default_value(self):
+        return self.default_value
