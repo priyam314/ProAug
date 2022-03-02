@@ -4,6 +4,8 @@ from numpy.random import choice
 from typing import List, Union
 from sys import getsizeof
 import PIL
+from multiprocessing import Pool
+from functools import partial
 
 # Custom modules
 from .augOperator import AugOperator
@@ -30,7 +32,7 @@ class AugSeq:
         self.__ran_gen_list: list = []
         self.__util: UtilClass = UtilClass()
         self.__update: bool = True
-    
+
     def __repr__(self):
         return self.__class__.__name__
     
@@ -118,10 +120,13 @@ class AugSeq:
             new_dict.update({key: 1//value.probability})
         return new_dict
     
-    def get_parameters_value(self)->dict:
+    def get_parameters_value(self, filter: str="")->dict:
         params = {}
         for name, augopr in self.__augList.items():
             params.update({name:augopr.get_parameters(self.__update)})
+        if filter=="":
+            for name, value in params.items():
+                if name not in self.__ran_gen_list: params.pop(name)
         return params
 
     def init(self, dataset_size:int, total_epochs:int, batch_size:int, lamda:int)->str:
@@ -248,15 +253,28 @@ class AugSeq:
             self.__augList.update({obj.name:obj})
         return self.__augList
     
-    def __apply_random(self, data:PIL.Image.Image=1, current_epoch:int=1, update:bool=True)->None:
+    def __apply_random(self, 
+        data: List[PIL.Image.Image]=1, 
+        current_epoch: int=1, 
+        update: bool=True
+        )->List[PIL.Image.Image]:
 
         self.choose_random(current_epoch)
         if update:
             self.update_parameters(current_epoch)
         self.reset(current_epoch)
+        return self.compose(data, current_epoch)
     
-    def __compose(self):
-        pass
+    def compose(self, 
+        data: List[PIL.Image.Image],
+        current_epoch: int=1
+        )->List[PIL.Image.Image]:
+
+        params = self.get_parameters_value()
+        with Pool(self.__util.aug_app(current_epoch)+2) as p:
+            for name, value in params.items():
+                data = p.map(partial(self.operator(name).func, **value), data)
+        return data
 
     def __init_summary(self, utils: UtilClass)->str:
 
@@ -271,10 +289,6 @@ class AugSeq:
         if self.__util.isChange(current_epoch):
             for _, value in self.__augList.items():
                 value.probability = 1.0
-
-    # def __reset_parameters(self, util: UtilClass=self.__util, current_epoch: int=1)->None:
-    #     for name, augopr in self.__augList.items():
-    #         augopr.__reset_parameters(util, current_epoch)
 
     def __string_size(self)->str:
         """
