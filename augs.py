@@ -1,14 +1,16 @@
 # Import Libraries
-from augly.image import *
 from pprint import pprint
-#from random_words import RandomWords
+from augly.image import *
 
 # Custom Modules
-from .param import Param
+from .augOperator import AugOperator
 from .augParam import AugParam
 from .augSeq import AugSeq
-from .augOperator import AugOperator
+from .param import Param
 from .rangeParam import *
+
+#from random_words import RandomWords
+
 
 # Define Empty auglist with empty dictionary
 Augs = AugSeq()
@@ -30,7 +32,7 @@ blurOpr = AugOperator( "blur", blur, 1.0, AugParam(
 
 colorJitterOpr = AugOperator( "color_jitter", color_jitter, 1.0, AugParam(
             					Param("brightness_factor", 1.0, ContRange(0.1, 2.0)),
-            					Param("contrast_factor", 1.0, ContRange(3.0, 0.1)),
+            					Param("contrast_factor", 1.0, DecContRange(3.0, 0.1)),
             					Param("saturation_factor", 1.0, LoopContRange(0.05, 5.0))))
 
 # contrastOpr = AugOperator( "contrast", contrast, 1.0, AugParam(
@@ -53,7 +55,7 @@ grayscaleOpr = AugOperator( "grayscale", grayscale, 1.0, AugParam(
 hFlipOpr = AugOperator( "hflip", hflip, 1.0 )
 
 memeFormatOpr = AugOperator( "meme_format", meme_format, 1.0, AugParam(
-									Param("text", "LOL", StrRange(1, 7)),
+									Param("text", "LOL", StrRange(1, 9)),
 									Param("opacity", 1.0, ContRange(0.09, 0.98)),
 									Param("caption_height", 250, DiscreteRange(10, 300))))
 

@@ -103,25 +103,54 @@ class ContRange(AbstractRangeParam):
 			reset=Color.RESET)
 
     def update(self, util: UtilClass, current_epoch:int=1)->float:
-        if self.__range_max>self.__range_min:
-            self.__update_util(self.__range_max, self.__range_min, util, current_epoch)
+        if self.__current_value>self.__range_max:
+                self.__current_value=self.__range_min
         else:
-            self.__update_util(self.__range_min, self.__range_max, util, current_epoch)
-    
-    def __update_util(self, a: float, b: float, util: UtilClass, current_epoch: int=1)->None:
-        if self.__current_value>a or self.__current_value<b:
-                self.__current_value=b
-        elif a>b:
             self.__current_value += util.divide_float(
-                a-b,util.aug_app(current_epoch))
-        else:
-            self.__current_value -= util.divide_float(
-                a-b,util.aug_app(current_epoch))
-
+                self.__range_max-self.__range_min,util.aug_app(current_epoch))
+             
     @property 
     def get_value(self)->float:
         return self.__current_value
+
+class DecContRange(AbstractRangeParam):
+    """
+    @desc
+        Continuos Range class to encapsulate the range which consists of float values
+        between specified range
     
+    @working
+        current value is initiated as minimum range value, then in AUG_APP steps that
+        completes base composition time(t number of epochs) current value is gradually 
+        increased from range_min to range_max
+    """
+
+    def __init__(self, range_min: float, range_max: float):
+        self.__range_min: float = range_min
+        self.__range_max: float = range_max
+        self.__current_value: float = self.__range_min
+
+    def __repr__(self):
+        var = """{cyan}DecContRange({green}
+                        range_min={magenta}{min}{green}, 
+                        range_max={magenta}{max}{green},
+                        current_value={magenta}{value}{cyan}){reset}"""
+        return var.format(
+            cyan=Color.CYAN, green=Color.GREEN, magenta=Color.MAGENTA, 
+			min=self.__range_min, max=self.__range_max,value=self.__current_value,
+			reset=Color.RESET)
+
+    def update(self, util: UtilClass, current_epoch:int=1)->float:
+        if self.__current_value<self.__range_max:
+                self.__current_value=self.__range_min
+        else:
+            self.__current_value -= util.divide_float(
+                self.__range_min-self.__range_max,util.aug_app(current_epoch))
+        
+    @property 
+    def get_value(self)->float:
+        return self.__current_value
+
 
 class LoopContRange(AbstractRangeParam):
     """
@@ -148,13 +177,13 @@ class LoopContRange(AbstractRangeParam):
 
     def update(self, util:UtilClass, current_epoch:int=1)->float:
 
-        while self.__current_value<=self.__range_max and self.__positive:
+        if self.__current_value<=self.__range_max and self.__positive:
             self.__current_value += 2*util.divide_float(
                 self.__range_max-self.__range_min, util.aug_app(current_epoch))
 
         if self.__current_value>=self.__range_max and self.__positive:self.__positive=False
 
-        while self.__current_value>=self.__range_min and not self.__positive:
+        if self.__current_value>=self.__range_min and not self.__positive:
             self.__current_value -= 2*util.divide_float(
                 self.__range_max-self.__range_min, util.aug_app(current_epoch))
 
