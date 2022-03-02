@@ -62,7 +62,11 @@ class AugSeq:
         """
         self.__AugObjList = augObj
     
-    def apply_random(self, data: List[PIL.Image.Image], current_epoch:int=1, update:bool = True)->None:
+    def apply_random(self, 
+        data: List[PIL.Image.Image], 
+        current_epoch:int=1, 
+        update:bool = True
+        )->List[PIL.Image.Image]:
         """
         @desc
         >>> apply randomly chosen augmentation operator over the image/batch of images
