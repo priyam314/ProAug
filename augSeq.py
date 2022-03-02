@@ -126,11 +126,13 @@ class AugSeq:
     
     def get_parameters_value(self, filter: str="")->dict:
         params = {}
+        # print ("length: ", len(self.__ran_gen_list))
+        # print ("selected list: ", self.__ran_gen_list)
         for name, augopr in self.__augList.items():
-            params.update({name:augopr.get_parameters(self.__update)})
-        if filter=="":
-            for name, value in params.items():
-                if name not in self.__ran_gen_list: params.pop(name)
+            if filter is not "all" and name in self.__ran_gen_list:
+                params.update({name:augopr.get_parameters(self.__update)})
+            elif filter=="all":
+                params.update({name:augopr.get_parameters(self.__update)})               
         return params
 
     def init(self, dataset_size:int, total_epochs:int, batch_size:int, lamda:int)->str:
@@ -267,7 +269,7 @@ class AugSeq:
         if update:
             self.update_parameters(current_epoch)
         self.reset(current_epoch)
-        return self.compose(data, current_epoch)
+        # return self.compose(data, current_epoch)
     
     def compose(self, 
         data: List[PIL.Image.Image],
@@ -275,7 +277,7 @@ class AugSeq:
         )->List[PIL.Image.Image]:
 
         params = self.get_parameters_value()
-        with Pool(self.__util.aug_app(current_epoch)+2) as p:
+        with Pool(int(self.__util.aug_app(current_epoch))+2) as p:
             for name, value in params.items():
                 data = p.map(partial(self.operator(name).func, **value), data)
         return data
