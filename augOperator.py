@@ -32,6 +32,7 @@ class AugOperator:
         self.probability: float = probability
         self.params: AugParam = params
         self.add_to: Callable = add_to
+        self.index: int = 0
 
     def __post_init__(self):
         """

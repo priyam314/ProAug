@@ -31,6 +31,7 @@ class AugSeq:
         self.__ran_gen_list: list = []
         self.__util: UtilClass = UtilClass()
         self.__update: bool = True
+        self.__current_count: int = 0
 
     def __repr__(self):
         return self.__class__.__name__
@@ -57,6 +58,8 @@ class AugSeq:
         }
         """
         self.__augList.update({obj.name:obj})
+        obj.index = self.__current_count
+        self.__current_count += 1
     
     def add_augObj_List(self, 
         augObj: List[AugOperator]
@@ -73,7 +76,7 @@ class AugSeq:
         data: List[PIL.Image.Image], 
         current_epoch:int=1, 
         update:bool = True
-        )->List[PIL.Image.Image]:
+        )->Union[List[PIL.Image.Image], List[float]]:
         """
         @desc
         >>> apply randomly chosen augmentation operator over the image/batch of images
@@ -140,12 +143,19 @@ class AugSeq:
         >>> Augs.show()
         { key:value ...}
         """
+        self.__current_count = 0
         self.__reset_from_start()
         self.__util.dataset_size(dataset_size).batch_size(batch_size).total_epochs(total_epochs).lamda(lamda)
         self.__add_objects(self.__AugObjList)
         self.__util.omega(self.length())
         return self.__init_summary(self.__util)
     
+    def selected_array(self)->List[float]:
+        l = [0 for _ in range(self.__util.o)]
+        for name in self.__ran_gen_list:
+            l[self.operator(name).index] = 1
+        return l
+
     ### Read ###
 
     def frequency(self)->dict:
@@ -303,19 +313,21 @@ class AugSeq:
         """
         for obj in objs:
             self.__augList.update({obj.name:obj})
+            obj.index = self.__current_count
+            self.__current_count += 1
         return self.__augList
     
     def __apply_random(self, 
         data: List[PIL.Image.Image]=1, 
         current_epoch: int=1, 
         update: bool=True
-        )->List[PIL.Image.Image]:
+        )->Union[List[PIL.Image.Image], List[float]]:
 
         self.choose_random(current_epoch)
         if update:
             self.update_parameters(current_epoch)
         self.reset(current_epoch)
-        # return self.compose(data, current_epoch)
+        return self.compose(data, current_epoch), self.selected_array()
 
     def __init_summary(self, 
         utils: UtilClass
