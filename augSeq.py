@@ -15,12 +15,11 @@ from .augUtils import UtilClass
 class AugSeq:
     """
     @attr
-        _augList: private data member. Dictionary to store all the AugOperators
-        _choice_name: private data member. Holds the name of randomly choosen
-                    Augmentation Operator
-        _AugObjList: this list initially holds all the Augmentation Operators
-                    in a list
+    >>> __augList: private data member. Dictionary to store all the AugOperators
+    >>> __choice_name: private data member. Holds the name of randomly choosen Augmentation Operator
+    >>> __AugObjList: this list initially holds all the Augmentation Operators in a list
     """
+    ### Dunder Methods ###
 
     def __init__(self):
         """
@@ -36,7 +35,11 @@ class AugSeq:
     def __repr__(self):
         return self.__class__.__name__
     
-    def add(self, obj: AugOperator)->None:
+    ### Insert ###
+
+    def add(self, 
+        obj: AugOperator
+        )->None:
         """
         @desc
         >>> add the Augmentation Operator object to Augmentation Pool
@@ -55,13 +58,17 @@ class AugSeq:
         """
         self.__augList.update({obj.name:obj})
     
-    def add_augObj_List(self, augObj: List[AugOperator])->None:
+    def add_augObj_List(self, 
+        augObj: List[AugOperator]
+        )->None:
         """
         @desc
         >>> adds the Augmentation Operator Objects to a list.
         """
         self.__AugObjList = augObj
     
+    ### Main ###
+
     def apply_random(self, 
         data: List[PIL.Image.Image], 
         current_epoch:int=1, 
@@ -79,7 +86,9 @@ class AugSeq:
         self.__update = update
         return self.__apply_random(data, current_epoch, update)
 
-    def choose_random(self, current_epoch:int=1)->None:
+    def choose_random(self, 
+        current_epoch:int=1
+        )->None:
         """
         @desc
         >>> chooses a random Augmentation Operator from Augmentation Operator Pool
@@ -103,6 +112,42 @@ class AugSeq:
             self.operator(name).update_probability()
             self.__ran_gen_list.append(name)
     
+    def compose(self, 
+        data: List[PIL.Image.Image],
+        current_epoch: int=1
+        )->List[PIL.Image.Image]:
+
+        params = self.get_parameters_value()
+        with Pool(int(self.__util.aug_app(current_epoch))+2) as p:
+            for name, value in params.items():
+                data = p.map(partial(self.operator(name).func, **value), data)
+        return data
+    
+    def init(self, 
+        dataset_size: int, 
+        total_epochs: int, 
+        batch_size: int, 
+        lamda: int
+        )->str:
+        """
+        @desc
+        >>> add all the objects to _augList
+
+        @example
+        >>> Augs.show()
+        {}
+        >>> Augs.init(...)
+        >>> Augs.show()
+        { key:value ...}
+        """
+        self.__reset_from_start()
+        self.__util.dataset_size(dataset_size).batch_size(batch_size).total_epochs(total_epochs).lamda(lamda)
+        self.__add_objects(self.__AugObjList)
+        self.__util.omega(self.length())
+        return self.__init_summary(self.__util)
+    
+    ### Read ###
+
     def frequency(self)->dict:
         """
         @desc
@@ -124,7 +169,9 @@ class AugSeq:
             new_dict.update({key: 1//value.probability})
         return new_dict
     
-    def get_parameters_value(self, filter: str="")->dict:
+    def get_parameters_value(self, 
+        filter: str=""
+        )->dict:
         params = {}
         # print ("length: ", len(self.__ran_gen_list))
         # print ("selected list: ", self.__ran_gen_list)
@@ -135,43 +182,9 @@ class AugSeq:
                 params.update({name:augopr.get_parameters(self.__update)})               
         return params
 
-    def init(self, dataset_size:int, total_epochs:int, batch_size:int, lamda:int)->str:
-        """
-        @desc
-        add all the objects to _augList
-
-        @example
-        >>> Augs.show()
-        {}
-        >>> Augs.init(...)
-        >>> Augs.show()
-        { key:value ...}
-        """
-        self.__util.dataset_size(dataset_size).batch_size(batch_size).total_epochs(total_epochs).lamda(lamda)
-        self.__add_objects(self.__AugObjList)
-        self.__util.omega(self.length())
-        return self.__init_summary(self.__util)
-        
     def length(self)->int:
         return len(self.__augList)
 
-    def operator(self, string:str)->AugOperator:
-        """
-        @desc
-        functional form of indexing a list
-
-        @example
-        >>> INPUT
-        >>> from ProAugs.augs import Augs
-        >>> Augs.init()
-        >>> Blur = Augs.operator('blur')
-        >>> Blur.probability()
-        >>> 
-        >>> OUTPUT
-        1.0
-        """
-        return self.__augList[string]
-    
     def probability(self)->dict:
         """
         @desc
@@ -192,20 +205,14 @@ class AugSeq:
         for key, value in self.__augList.items():
             new_dict.update({key: value.probability})
         return new_dict
-
-    def reset(self, current_epoch: int=1)->None:
-        """
-        
-        """
-        self.__reset_probability(current_epoch)
-
+    
     def show(self)->Union[dict,str]:
         """
         @desc
             return the _augList dictionary
         """
         return self.__augList
-    
+
     def size(self)->str:
         """
         @desc
@@ -220,7 +227,7 @@ class AugSeq:
             345 bytes
         """
         return self._string_size()
-    
+
     def summary(self)->str:
         """
         @desc 
@@ -228,7 +235,42 @@ class AugSeq:
         """
         return self.__init_summary(self.util) + "\n" + self.show()
     
-    def update_parameters(self, current_epoch:int=1)->None:
+    ### Access ###
+
+    def operator(self, 
+        string:str
+        )->AugOperator:
+        """
+        @desc
+        functional form of indexing a list
+
+        @example
+        >>> INPUT
+        >>> from ProAugs.augs import Augs
+        >>> Augs.init()
+        >>> Blur = Augs.operator('blur')
+        >>> Blur.probability()
+        >>> 
+        >>> OUTPUT
+        1.0
+        """
+        return self.__augList[string]
+
+    ### Reset ###
+
+    def reset(self, 
+        current_epoch: int=1
+        )->None:
+        """
+        
+        """
+        self.__reset_probability(current_epoch)
+    
+    ### Update ###
+
+    def update_parameters(self, 
+        current_epoch:int=1
+        )->None:
 
         for aug_name in self.__ran_gen_list:
             self.operator(aug_name).update_parameters(self.__util, current_epoch)
@@ -249,7 +291,11 @@ class AugSeq:
         for aug in self.__ran_gen_list:
             self.__augList[aug].update_probability()
     
-    def __add_objects(self, objs:List[AugOperator])->dict:
+    ### Helper methods ###
+
+    def __add_objects(self, 
+        objs:List[AugOperator]
+        )->dict:
         """
         @desc
         >>> adds the list of Augmentation Operator objects to _augList dictionary.
@@ -270,28 +316,26 @@ class AugSeq:
             self.update_parameters(current_epoch)
         self.reset(current_epoch)
         # return self.compose(data, current_epoch)
-    
-    def compose(self, 
-        data: List[PIL.Image.Image],
-        current_epoch: int=1
-        )->List[PIL.Image.Image]:
 
-        params = self.get_parameters_value()
-        with Pool(int(self.__util.aug_app(current_epoch))+2) as p:
-            for name, value in params.items():
-                data = p.map(partial(self.operator(name).func, **value), data)
-        return data
+    def __init_summary(self, 
+        utils: UtilClass
+        )->str:
 
-    def __init_summary(self, utils: UtilClass)->str:
-
-        var = """{green}Augs initiated with\n  DATASET_SIZE: {magenta}{ds}{green},\n  TOTAL_EPOCHS: {magenta}{te}{green},\n  BATCH_SIZE: {magenta}{bs}{green},\n  LAMDA: {magenta}{la}{green},\n  OMEGA: {magenta}{om}{reset}"""
+        var = """{green}Augs initiated with
+                        DATASET_SIZE: {magenta}{ds}{green},
+                        TOTAL_EPOCHS: {magenta}{te}{green},
+                        BATCH_SIZE: {magenta}{bs}{green},
+                        LAMDA: {magenta}{la}{green},
+                        OMEGA: {magenta}{om}{reset}"""
         return var.format(
                 green=Color.GREEN, magenta=Color.MAGENTA,
                 reset=Color.RESET, te=utils.te,
                 bs=utils.bs, la=utils.l, om=utils.o, ds=utils.ds
             )
     
-    def __reset_probability(self, current_epoch: int=1)->None:
+    def __reset_probability(self, 
+        current_epoch: int=1
+        )->None:
         if self.__util.isChange(current_epoch):
             for _, value in self.__augList.items():
                 value.probability = 1.0
@@ -313,3 +357,22 @@ class AugSeq:
         max_value = max([value.probability for _, value in self.__augList.items()])
         max_aug_names = [key for key,value in self.__augList.items() if value.probability==max_value]
         return max_aug_names
+    
+    def __reset_from_start(self)->None:
+        """
+        @desc
+        >>> to be used with Augs.init() to reset already executed values
+        """
+        ## Change the probabilities to default
+        for _, value in self.__augList.items():
+            value.probability = 1.0
+        ## Change the AbstractRange updated values 
+        self.__reset_params_to_default()
+
+    def __reset_params_to_default(self)->None:
+        """
+        @desc
+        >>> reset the params value to default
+        """
+        for _, value in self.__augList.items():
+            value.reset_parameters()

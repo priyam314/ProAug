@@ -36,3 +36,6 @@ class Param:
     
     def get_default_value(self):
         return self.default_value
+    
+    def reset_parameter(self)->None:
+        self.range.reset()

@@ -71,12 +71,12 @@ class AugOperator:
         """
         self.probability = 1.0/(1.0/self.probability+1.0)
 
-    def __reset_parameters(self, util: UtilClass, current_epoch: int=1)->None:
+    def reset_parameters(self)->None:
         """
         @desc
         >>> sends the request to AugParam to reset the values of parameters
         """
-        self.params.__reset_parameters(util, current_epoch)
+        self.params.reset_parameters()
 
     def update_parameters(self, util: UtilClass, current_epoch: int=1)->None:
         """

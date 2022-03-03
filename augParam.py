@@ -32,13 +32,13 @@ class AugParam:
         for obj in objs:
             self.__paramList[obj.name]=obj
         
-    def __reset_parameters(self, util: UtilClass, current_epoch: int=1)->None:
+    def reset_parameters(self)->None:
         """
         @desc
         >>> sends the request to reset the parameters values to all the available params objs
         """
-        for name, param in self.__paramList.items():
-            param.__reset_parameters(util, current_epoch)
+        for _, param in self.__paramList.items():
+            param.reset_parameter()
     
     def parameter(self, name:str="")->Param:
         return self.__paramList[name]

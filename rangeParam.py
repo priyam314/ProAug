@@ -42,6 +42,10 @@ class AbstractRangeParam(ABC):
     @abstractmethod
     def update(self):
         pass
+    
+    @abstractmethod
+    def reset(self):
+        pass
 
 
 class DiscreteRange(AbstractRangeParam):
@@ -50,7 +54,10 @@ class DiscreteRange(AbstractRangeParam):
     >>> Discrete Range class to encapsulate the range which consists of discrete values
     """
 
-    def __init__(self, range_min: int, range_max: int):
+    def __init__(self, 
+        range_min: int, 
+        range_max: int)->None:
+
         self.__range_min: int = range_min
         self.__range_max: int = range_max
         self.__current_value :int = self.__range_min
@@ -64,7 +71,10 @@ class DiscreteRange(AbstractRangeParam):
             cyan=Color.CYAN, green=Color.GREEN, magenta=Color.MAGENTA, range_min=self.__range_min, 
             range_max=self.__range_max, current_value=self.__current_value, reset=Color.RESET)
 
-    def update(self, util: UtilClass, current_epoch: int=1):
+    def update(self, 
+        util: UtilClass, 
+        current_epoch: int=1
+        )->None:
         if self.__current_value>self.__range_max: # reset
             self.__current_value=self.__range_min
         else:
@@ -74,6 +84,9 @@ class DiscreteRange(AbstractRangeParam):
     @property
     def get_value(self)->int:
         return int(self.__current_value)
+
+    def reset(self)->None:
+        self.__current_value = self.__range_min
 
 class ContRange(AbstractRangeParam):
     """
@@ -87,7 +100,10 @@ class ContRange(AbstractRangeParam):
         increased from range_min to range_max
     """
 
-    def __init__(self, range_min: float, range_max: float):
+    def __init__(self, 
+        range_min: float, 
+        range_max: float
+        )->None:
         self.__range_min: float = range_min
         self.__range_max: float = range_max
         self.__current_value: float = self.__range_min
@@ -102,7 +118,10 @@ class ContRange(AbstractRangeParam):
 			min=self.__range_min, max=self.__range_max,value=self.__current_value,
 			reset=Color.RESET)
 
-    def update(self, util: UtilClass, current_epoch:int=1)->float:
+    def update(self, 
+        util: UtilClass, 
+        current_epoch:int=1
+        )->None:
         if self.__current_value>self.__range_max:
                 self.__current_value=self.__range_min
         else:
@@ -112,6 +131,9 @@ class ContRange(AbstractRangeParam):
     @property 
     def get_value(self)->float:
         return self.__current_value
+
+    def reset(self)->None:
+        self.__current_value = self.__range_min
 
 class DecContRange(AbstractRangeParam):
     """
@@ -125,7 +147,10 @@ class DecContRange(AbstractRangeParam):
         increased from range_min to range_max
     """
 
-    def __init__(self, range_min: float, range_max: float):
+    def __init__(self, 
+        range_min: float, 
+        range_max: float
+        )->None:
         self.__range_min: float = range_min
         self.__range_max: float = range_max
         self.__current_value: float = self.__range_min
@@ -140,7 +165,10 @@ class DecContRange(AbstractRangeParam):
 			min=self.__range_min, max=self.__range_max,value=self.__current_value,
 			reset=Color.RESET)
 
-    def update(self, util: UtilClass, current_epoch:int=1)->float:
+    def update(self, 
+        util: UtilClass, 
+        current_epoch:int=1
+        )->float:
         if self.__current_value<self.__range_max:
                 self.__current_value=self.__range_min
         else:
@@ -151,6 +179,8 @@ class DecContRange(AbstractRangeParam):
     def get_value(self)->float:
         return self.__current_value
 
+    def reset(self)->None:
+        self.__current_value = self.__range_max
 
 class LoopContRange(AbstractRangeParam):
     """
@@ -158,7 +188,10 @@ class LoopContRange(AbstractRangeParam):
         its similar to ContRange class, except
         it first goes from range_min to range_max, and then in reverse in same AUG_APP steps
     """
-    def __init__(self, range_min: float, range_max: float):
+    def __init__(self, 
+        range_min: float, 
+        range_max: float
+        )->None:
         self.__range_min: float = range_min
         self.__range_max: float = range_max
         self.__current_value: float = self.__range_min
@@ -175,7 +208,10 @@ class LoopContRange(AbstractRangeParam):
 			min=self.__range_min, max=self.__range_max,value=self.__current_value,
 			reset=Color.RESET, positive_value=self.__positive)
 
-    def update(self, util:UtilClass, current_epoch:int=1)->float:
+    def update(self, 
+        util:UtilClass, 
+        current_epoch:int=1
+        )->None:
 
         if self.__current_value<=self.__range_max and self.__positive:
             self.__current_value += 2*util.divide_float(
@@ -193,6 +229,10 @@ class LoopContRange(AbstractRangeParam):
     def get_value(self)->float:
         return self.__current_value
 
+    def reset(self)->None:
+        self.__current_value = self.__range_min
+        self.__positive = True
+
 class EnumRange(AbstractRangeParam):
     """
     @desc
@@ -200,7 +240,9 @@ class EnumRange(AbstractRangeParam):
     encapsulated under Discrete Range because of their dynamics of being strings.
     """
 
-    def __init__(self, *args: str):
+    def __init__(self, 
+        *args: str
+        )->None:
         self.__enumsList: list = [arg for arg in args]
         self.__choice_enum: str = ""
 
@@ -210,10 +252,13 @@ class EnumRange(AbstractRangeParam):
                 [str(arg) for arg in self.__enumsList]),
             Color.CYAN, Color.RESET)
 
-    def show(self):
+    def show(self)->List[str]:
         return self.__enumsList
 
-    def update(self, util: UtilClass, current_epoch: int=1):
+    def update(self, 
+        util: UtilClass, 
+        current_epoch: int=1
+        )->None:
         shuffle(self.__enumsList)
         self.__choice_enum = choice(self.__enumsList)
     
@@ -221,10 +266,13 @@ class EnumRange(AbstractRangeParam):
     def get_value(self)->str:
         return self.__choice_enum
 
+    def reset(self)->None:
+        self.__choice_enum = ""
+
 class ColorRange(AbstractRangeParam):
     """
     @desc
-    Color Range class encapsulate the Color values. because of their nature of 'RGB'
+    >>> Color Range class encapsulate the Color values. because of their nature of 'RGB'
     they cannot be put under Discrete Range too.
     """
 
@@ -250,13 +298,21 @@ class ColorRange(AbstractRangeParam):
     def get_value(self)->List:
         return [self.__red, self.__green, self.__blue]
 
+    def reset(self)->None:
+        self.__red = 0
+        self.__blue = 0
+        self.__green = 0
+
 class StrRange(AbstractRangeParam):
     """
     @desc
     
     """
 
-    def __init__(self, range_min: int, range_max: int):
+    def __init__(self, 
+        range_min: int, 
+        range_max: int
+        )->None:
         self.__range_min: float = range_min
         self.__range_max: float = range_max
         self.__current_string_len: int = 1
@@ -267,16 +323,25 @@ class StrRange(AbstractRangeParam):
             Color.CYAN, Color.GREEN, Color.MAGENTA, self.__range_min, Color.GREEN,
             Color.MAGENTA, self.__range_max, Color.CYAN, Color.RESET)
 
-    def update(self, util: UtilClass, current_epoch: int=1):
+    def update(self, 
+        util: UtilClass, 
+        current_epoch: int=1
+        )->None:
         if util.isChange(current_epoch):
             self.__current_string_len = 1
         self.__current_string_len += util.divide_float(
             self.__range_max-self.__range_min, util.aug_app(current_epoch))
         self.__string = self.__out_n_len_str(int(self.__current_string_len))
 
-    def __out_n_len_str(self, n: int=1)->str:
+    def __out_n_len_str(self, 
+        n: int=1
+        )->str:
         return "".join([str(choice(ascii_uppercase + ascii_lowercase)) for i in range(n)])
     
     @property
     def get_value(self)->str:
         return self.__string
+    
+    def reset(self)->None:
+        self.__current_string_len = 1
+        self.__string = ""
