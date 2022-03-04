@@ -76,11 +76,11 @@ opacityOpr = AugOperator("opacity", opacity, 1.0, AugParam(
 AugObj = [
             blurOpr,
             colorJitterOpr,
-            cropOpr,
-            encodingQualityOpr,
+            # cropOpr,
+            # encodingQualityOpr,
 			grayscaleOpr,
             hFlipOpr,
-			memeFormatOpr,
+			# memeFormatOpr,
 			opacityOpr
         ]
 
