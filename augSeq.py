@@ -121,9 +121,8 @@ class AugSeq:
         )->List[PIL.Image.Image]:
 
         params = self.get_parameters_value()
-        with Pool(int(self.__util.aug_app(current_epoch))+2) as p:
-            for name, value in params.items():
-                data = p.map(partial(self.operator(name).func, **value), data)
+        for name, value in params.items():
+            data = list(map(partial(self.operator(name).func, **value), data))
         return data
     
     def init(self, 
@@ -318,7 +317,7 @@ class AugSeq:
         return self.__augList
     
     def __apply_random(self, 
-        data: List[PIL.Image.Image]=1, 
+        data: List[PIL.Image.Image], 
         current_epoch: int=1, 
         update: bool=True
         )->Union[List[PIL.Image.Image], List[float]]:
@@ -327,8 +326,8 @@ class AugSeq:
         if update:
             self.update_parameters(current_epoch)
         self.reset(current_epoch)
-        return self.compose(data, current_epoch), self.selected_array()
-
+        return self.compose(data, current_epoch)
+        
     def __init_summary(self, 
         utils: UtilClass
         )->str:
