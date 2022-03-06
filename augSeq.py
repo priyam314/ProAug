@@ -29,7 +29,7 @@ class AugSeq:
         self.__AugObjList: List = []
         self.__augList: dict = {}
         self.__ran_gen_list: list = []
-        self.__util: UtilClass = UtilClass()
+        self.util: UtilClass = UtilClass()
         self.__update: bool = True
         self.__current_count: int = 0
 
@@ -108,7 +108,7 @@ class AugSeq:
         """
         if len(self.__ran_gen_list)>0:
             self.__ran_gen_list.clear()
-        eta = ((current_epoch-1)*self.__util.l)//self.__util.te + 1
+        eta = ((current_epoch-1)*self.util.l)//self.util.te + 1
         for _ in range(eta):
             max_prob_names = self.__max_prob()
             name = choice(max_prob_names)
@@ -144,13 +144,13 @@ class AugSeq:
         """
         self.__current_count = 0
         self.__reset_from_start()
-        self.__util.dataset_size(dataset_size).batch_size(batch_size).total_epochs(total_epochs).lamda(lamda)
+        self.util.dataset_size(dataset_size).batch_size(batch_size).total_epochs(total_epochs).lamda(lamda)
         self.__add_objects(self.__AugObjList)
-        self.__util.omega(self.length())
-        return self.__init_summary(self.__util)
+        self.util.omega(self.length())
+        return self.__init_summary(self.util)
     
     def selected_array(self)->List[float]:
-        l = [0 for _ in range(self.__util.o)]
+        l = [0 for _ in range(self.util.o)]
         for name in self.__ran_gen_list:
             l[self.operator(name).index] = 1
         return l
@@ -282,7 +282,7 @@ class AugSeq:
         )->None:
 
         for aug_name in self.__ran_gen_list:
-            self.operator(aug_name).update_parameters(self.__util, current_epoch)
+            self.operator(aug_name).update_parameters(self.util, current_epoch)
     
     def update_probability(self)->None:
         """
@@ -347,7 +347,7 @@ class AugSeq:
     def __reset_probability(self, 
         current_epoch: int=1
         )->None:
-        if self.__util.isChange(current_epoch):
+        if self.util.isChange(current_epoch):
             for _, value in self.__augList.items():
                 value.probability = 1.0
 
