@@ -46,6 +46,10 @@ class AbstractRangeParam(ABC):
     @abstractmethod
     def reset(self):
         pass
+    
+    @abstractmethod
+    def load_value(self, value):
+        pass
 
 
 class DiscreteRange(AbstractRangeParam):
@@ -84,6 +88,9 @@ class DiscreteRange(AbstractRangeParam):
     @property
     def get_value(self)->int:
         return int(self.__current_value)
+    
+    def load_value(self, value):
+        self.__current_value = value
 
     def reset(self)->None:
         self.__current_value = self.__range_min
@@ -131,6 +138,9 @@ class ContRange(AbstractRangeParam):
     @property 
     def get_value(self)->float:
         return self.__current_value
+    
+    def load_value(self, value):
+        self.__current_value = value
 
     def reset(self)->None:
         self.__current_value = self.__range_min
@@ -178,6 +188,9 @@ class DecContRange(AbstractRangeParam):
     @property 
     def get_value(self)->float:
         return self.__current_value
+    
+    def load_value(self, value):
+        self.__current_value = value
 
     def reset(self)->None:
         self.__current_value = self.__range_max
@@ -228,6 +241,9 @@ class LoopContRange(AbstractRangeParam):
     @property 
     def get_value(self)->float:
         return self.__current_value
+    
+    def load_value(self, value):
+        self.__current_value = value
 
     def reset(self)->None:
         self.__current_value = self.__range_min
@@ -265,6 +281,9 @@ class EnumRange(AbstractRangeParam):
     @property
     def get_value(self)->str:
         return self.__choice_enum
+    
+    def load_value(self, value):
+        self.__choice_enum = value
 
     def reset(self)->None:
         self.__choice_enum = ""
@@ -297,6 +316,11 @@ class ColorRange(AbstractRangeParam):
     @property
     def get_value(self)->List:
         return [self.__red, self.__green, self.__blue]
+    
+    def load_value(self, value):
+        self.__red = value[0]
+        self.__green = value[1]
+        self.blue = value[2]
 
     def reset(self)->None:
         self.__red = 0
@@ -341,6 +365,9 @@ class StrRange(AbstractRangeParam):
     @property
     def get_value(self)->str:
         return self.__string
+    
+    def load_value(self, value):
+        self.__current_string_len = len(value)
     
     def reset(self)->None:
         self.__current_string_len = 1

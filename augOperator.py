@@ -55,6 +55,14 @@ class AugOperator:
         >>> returns the Param Object __repr__ of parameter whose name is `param_name`
         """
         return self.params.parameter(param_name)
+    
+    def load_param(self,
+        param: dict)->None:
+        """
+        @desc
+        >>> updates the parameters values of the aug operator
+        """
+        self.params.load_param(param)
 
     def update_probability(self)->None:
         """

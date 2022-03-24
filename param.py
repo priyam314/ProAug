@@ -39,3 +39,6 @@ class Param:
     
     def reset_parameter(self)->None:
         self.range.reset()
+    
+    def load_param(self, value):
+        self.range.load_value(value)

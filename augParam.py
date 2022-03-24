@@ -40,6 +40,15 @@ class AugParam:
         for _, param in self.__paramList.items():
             param.reset_parameter()
     
+    def load_param(self,
+        param: dict)->None:
+        """
+        @desc
+        >>> update each param of the operator
+        """
+        for name, value in param.items():
+            self.parameter(name).load_param(value)
+    
     def parameter(self, name:str="")->Param:
         return self.__paramList[name]
     

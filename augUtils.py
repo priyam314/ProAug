@@ -18,7 +18,6 @@ class UtilClass:
         self.__lamda = lamda
         return self
     def omega(self, omega: int=1):
-        print ("run")
         self.__omega = omega
         return self
     def divide_float(self, a: float, b: float)->float:

@@ -16,7 +16,6 @@ class AugSeq:
     """
     @attr
     >>> __augList: private data member. Dictionary to store all the AugOperators
-    >>> __choice_name: private data member. Holds the name of randomly choosen Augmentation Operator
     >>> __AugObjList: this list initially holds all the Augmentation Operators in a list
     """
     ### Dunder Methods ###
@@ -70,6 +69,15 @@ class AugSeq:
         """
         self.__AugObjList = augObj
     
+    def load_params(self,
+        paramDict: dict)->None:
+        """
+        @desc
+        >>> loads the parameter values for any particular epoch
+        """
+        for name, param in paramDict.items():
+            self.operator(name).load_param(param)
+    
     ### Main ###
 
     def apply_random(self, 
@@ -101,7 +109,7 @@ class AugSeq:
         @example
         >>> INPUT
         >>> Augs.init(...)
-        >>> Augs.chooseRandom()
+        >>> Augs.choose_random()
         >>> 
         >>> OUTPUT
         'blur'
@@ -147,7 +155,17 @@ class AugSeq:
         self.util.dataset_size(dataset_size).batch_size(batch_size).total_epochs(total_epochs).lamda(lamda)
         self.__add_objects(self.__AugObjList)
         self.util.omega(self.length())
-        return self.__init_summary(self.util)
+        var = """{green}Augs initiated with
+                        DATASET_SIZE: {magenta}{ds}{green},
+                        TOTAL_EPOCHS: {magenta}{te}{green},
+                        BATCH_SIZE: {magenta}{bs}{green},
+                        LAMDA: {magenta}{la}{green},
+                        OMEGA: {magenta}{om}{reset}"""
+        return var.format(
+                green=Color.GREEN, magenta=Color.MAGENTA,
+                reset=Color.RESET, te=self.util.te,
+                bs=self.util.bs, la=self.util.l, om=self.util.o, ds=self.util.ds
+            )
     
     def selected_array(self)->List[float]:
         l = [0 for _ in range(self.util.o)]
@@ -185,7 +203,7 @@ class AugSeq:
         # print ("length: ", len(self.__ran_gen_list))
         # print ("selected list: ", self.__ran_gen_list)
         for name, augopr in self.__augList.items():
-            if filter is not "all" and name in self.__ran_gen_list:
+            if filter != "all" and name in self.__ran_gen_list:
                 params.update({name:augopr.get_parameters(self.__update)})
             elif filter=="all":
                 params.update({name:augopr.get_parameters(self.__update)})               
@@ -327,22 +345,6 @@ class AugSeq:
             self.update_parameters(current_epoch)
         self.reset(current_epoch)
         return self.compose(data, current_epoch)
-        
-    def __init_summary(self, 
-        utils: UtilClass
-        )->str:
-
-        var = """{green}Augs initiated with
-                        DATASET_SIZE: {magenta}{ds}{green},
-                        TOTAL_EPOCHS: {magenta}{te}{green},
-                        BATCH_SIZE: {magenta}{bs}{green},
-                        LAMDA: {magenta}{la}{green},
-                        OMEGA: {magenta}{om}{reset}"""
-        return var.format(
-                green=Color.GREEN, magenta=Color.MAGENTA,
-                reset=Color.RESET, te=utils.te,
-                bs=utils.bs, la=utils.l, om=utils.o, ds=utils.ds
-            )
     
     def __reset_probability(self, 
         current_epoch: int=1
