@@ -6,6 +6,7 @@ from sys import getsizeof
 import PIL
 from multiprocessing import Pool
 from functools import partial
+from pprint import pformat
 
 # Custom modules
 from .augOperator import AugOperator
@@ -138,7 +139,7 @@ class AugSeq:
         total_epochs: int, 
         batch_size: int, 
         lamda: int
-        )->str:
+        )->None:
         """
         @desc
         >>> add all the objects to _augList
@@ -155,17 +156,12 @@ class AugSeq:
         self.util.dataset_size(dataset_size).batch_size(batch_size).total_epochs(total_epochs).lamda(lamda)
         self.__add_objects(self.__AugObjList)
         self.util.omega(self.length())
-        var = """{green}Augs initiated with
-                        DATASET_SIZE: {magenta}{ds}{green},
-                        TOTAL_EPOCHS: {magenta}{te}{green},
-                        BATCH_SIZE: {magenta}{bs}{green},
-                        LAMDA: {magenta}{la}{green},
-                        OMEGA: {magenta}{om}{reset}"""
-        return var.format(
-                green=Color.GREEN, magenta=Color.MAGENTA,
-                reset=Color.RESET, te=self.util.te,
-                bs=self.util.bs, la=self.util.l, om=self.util.o, ds=self.util.ds
-            )
+        var = {"DATASET_SIZE": self.util.ds,
+                "TOTAL_EPOCHS": self.util.te,
+                "BATCH_SIZE": self.util.bs,
+                "LAMDA": self.util.l,
+                "OMEGA": self.util.o}
+        return "Augs Initiated with\n" + pformat(var)
     
     def selected_array(self)->List[float]:
         l = [0 for _ in range(self.util.o)]
