@@ -161,7 +161,8 @@ class AugSeq:
                 "BATCH_SIZE": self.util.bs,
                 "LAMDA": self.util.l,
                 "OMEGA": self.util.o}
-        return "Augs Initiated with\n" + pformat(var)
+        print ("Augs Initiated with\n")
+        return pformat(var)
     
     def selected_array(self)->List[float]:
         l = [0 for _ in range(self.util.o)]
