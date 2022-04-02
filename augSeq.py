@@ -156,13 +156,9 @@ class AugSeq:
         self.util.dataset_size(dataset_size).batch_size(batch_size).total_epochs(total_epochs).lamda(lamda)
         self.__add_objects(self.__AugObjList)
         self.util.omega(self.length())
-        var = {"DATASET_SIZE": self.util.ds,
-                "TOTAL_EPOCHS": self.util.te,
-                "BATCH_SIZE": self.util.bs,
-                "LAMDA": self.util.l,
-                "OMEGA": self.util.o}
+        var = "DATASET_SIZE : {}\n, TOTAL_EPOCHS: {}\n, BATCH_SIZE : {}\n, LAMDA : {}\n, OMEGA : {}\n"
         print ("Augs Initiated with\n")
-        return pformat(var)
+        return var.format(self.util.ds, self.util.te, self.util.bs, self.util.l, self.util.o)
     
     def selected_array(self)->List[float]:
         l = [0 for _ in range(self.util.o)]
